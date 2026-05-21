@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>中文朗读测试</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="student-panel" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Chinese Speaking Assessment</p>
+          <h1 id="page-title">中文朗读测试</h1>
+        </div>
+        <form id="student-form" class="student-form">
+          <label>
+            学生姓名
+            <input id="student-name" name="studentName" autocomplete="name" required />
+          </label>
+          <label>
+            邮箱
+            <input id="student-email" name="email" type="email" autocomplete="email" required />
+          </label>
+        </form>
+      </section>
+
+      <section id="config-warning" class="notice hidden" role="status">
+        Google Drive 还没有配置。可以先测试录音界面，上传前请填写服务器环境变量。
+      </section>
+
+      <section id="question-list" class="question-list" aria-label="朗读题目"></section>
+
+      <section class="submit-bar">
+        <div id="summary" class="summary">已录音 0 / 10，已上传 0 / 10</div>
+        <div class="submit-actions">
+          <button id="evaluate-all" type="button">AI评估</button>
+          <button id="submit-all" class="primary-button" type="button">提交全部录音</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="./config.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

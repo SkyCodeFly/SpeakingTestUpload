@@ -1,0 +1,13 @@
+{
+  "name": "speaking-test-upload",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chinese speaking test recorder with Google Drive upload.",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,8 @@
+.env
+.env.local
+*.log
+server.out.log
+server.err.log
+test-*.json
+test-*.wav
+node_modules/
