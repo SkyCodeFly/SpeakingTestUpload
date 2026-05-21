@@ -272,6 +272,8 @@ async function evaluateQuestion(item) {
 
     item.evaluation = {
       score: data.score,
+      completenessScore: data.completenessScore,
+      pronunciationScore: data.pronunciationScore,
       feedback: data.feedback,
       transcript: data.transcript,
     };
@@ -308,6 +310,7 @@ function renderEvaluation(item) {
 
   evaluationBox.innerHTML = `
     <div><strong>AI评分：${item.evaluation.score}/100</strong></div>
+    <div>阅读完整性：${item.evaluation.completenessScore}/50　发音清晰度：${item.evaluation.pronunciationScore}/50</div>
     <div>${escapeHtml(item.evaluation.feedback)}</div>
     <div class="transcript">识别文本：${escapeHtml(item.evaluation.transcript || "未识别到清楚文字")}</div>
   `;

@@ -264,7 +264,13 @@ async function evaluateReading({ questionNumber, prompt, transcript }) {
       input: [
         {
           role: "system",
-          content: "你是一名美国小学中文全科老师，正在评价四年级学生的中文朗读。请温和、具体、简短。",
+          content: [
+            "你是一名美国小学中文老师，正在评价四年级学生的中文朗读。",
+            "评分必须保守，不能因为语音识别文本看起来接近就自动给高分。",
+            "如果转写为空、明显不完整、或缺少目标句子的关键内容，阅读完整性必须低分。",
+            "总分由两部分组成：阅读完整性 0-50 分，发音和读音清晰度 0-50 分，共 100 分。",
+            "反馈要温和、具体、简短，指出漏读/错读/发音清晰度方面的一到两个重点。",
+          ].join("\n"),
         },
         {
           role: "user",
@@ -272,8 +278,11 @@ async function evaluateReading({ questionNumber, prompt, transcript }) {
             `题号：Q${questionNumber}`,
             `目标句子：${prompt}`,
             `语音转写：${transcript || "未识别到清楚文字"}`,
-            "请根据朗读内容与目标句子的接近程度、漏读/错读、中文发音清晰度进行评价。",
-            "只返回 JSON：{\"score\":0到100整数,\"feedback\":\"一到两句中文教师点评\"}",
+            "请按以下标准评分：",
+            "1. 阅读完整性 0-50 分：学生是否读出了目标句子的主要字词、顺序和完整意思。漏读、跳读、读成别的句子、转写为空都要明显扣分。",
+            "2. 发音和读音清晰度 0-50 分：中文声母、韵母、声调、停顿和整体清晰度。若无法从转写判断发音，请不要给满分，应保守评分。",
+            "如果转写文本与目标句子高度相似但你无法确认真实发音，只能在发音项给中等偏上分，不能自动满分。",
+            "只返回 JSON：{\"completenessScore\":0到50整数,\"pronunciationScore\":0到50整数,\"score\":0到100整数,\"feedback\":\"一到两句中文教师点评\"}",
           ].join("\n"),
         },
       ],
@@ -285,10 +294,12 @@ async function evaluateReading({ questionNumber, prompt, transcript }) {
             type: "object",
             additionalProperties: false,
             properties: {
+              completenessScore: { type: "integer", minimum: 0, maximum: 50 },
+              pronunciationScore: { type: "integer", minimum: 0, maximum: 50 },
               score: { type: "integer", minimum: 0, maximum: 100 },
               feedback: { type: "string" },
             },
-            required: ["score", "feedback"],
+            required: ["completenessScore", "pronunciationScore", "score", "feedback"],
           },
           strict: true,
         },
@@ -300,8 +311,12 @@ async function evaluateReading({ questionNumber, prompt, transcript }) {
 
   const text = extractResponseText(data);
   const parsed = JSON.parse(text);
+  const completenessScore = Math.max(0, Math.min(50, Number(parsed.completenessScore) || 0));
+  const pronunciationScore = Math.max(0, Math.min(50, Number(parsed.pronunciationScore) || 0));
   return {
-    score: Math.max(0, Math.min(100, Number(parsed.score) || 0)),
+    completenessScore,
+    pronunciationScore,
+    score: Math.max(0, Math.min(100, Number(parsed.score) || completenessScore + pronunciationScore)),
     feedback: String(parsed.feedback || "").trim(),
   };
 }
