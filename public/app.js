@@ -1,28 +1,4 @@
-const prompts = [
-  "清晨阳光照进教室同学们安静读书准备上课了",
-  "妈妈带我去公园观察小树发新芽记录变化过程",
-  "我们一起整理书包准备明天上课用品齐全检查",
-  "小明认真听讲举手回答问题声音清楚响亮自然",
-  "雨后天空出现彩虹大家开心欢呼拍手称赞不停",
-  "爷爷教我写毛笔字一笔一画慢慢练很专心进步",
-  "图书馆里很安静我们轻声找故事书认真看分享",
-  "老师鼓励大家勇敢表达想法学会互相尊重倾听",
-  "周末我和朋友参加社区清洁活动帮助邻居卫生",
-  "午饭以后我们排队来到操场散步呼吸空气新鲜",
-];
-
-const state = prompts.map((prompt, index) => ({
-  prompt,
-  questionNumber: index + 1,
-  recorder: null,
-  chunks: [],
-  blob: null,
-  audioUrl: "",
-  uploaded: false,
-  uploading: false,
-  evaluating: false,
-  evaluation: null,
-}));
+let state = [];
 
 let submitted = false;
 let aiConfigured = false;
@@ -39,6 +15,7 @@ const warning = document.querySelector("#config-warning");
 init();
 
 async function init() {
+  await loadQuestions();
   renderQuestions();
   bindEvents();
   updateSummary();
@@ -53,6 +30,31 @@ async function init() {
   } catch {
     warning.classList.remove("hidden");
   }
+}
+
+async function loadQuestions() {
+  const response = await fetch("./questions.json", { cache: "no-store" });
+  if (!response.ok) throw new Error("无法读取题目文件 questions.json");
+
+  const prompts = await response.json();
+  if (!Array.isArray(prompts) || prompts.length === 0) {
+    throw new Error("questions.json 必须是至少包含一道题目的数组。");
+  }
+
+  state = prompts
+    .map((prompt, index) => ({
+      prompt: String(prompt).trim(),
+      questionNumber: index + 1,
+      recorder: null,
+      chunks: [],
+      blob: null,
+      audioUrl: "",
+      uploaded: false,
+      uploading: false,
+      evaluating: false,
+      evaluation: null,
+    }))
+    .filter((item) => item.prompt);
 }
 
 function renderQuestions() {
@@ -325,7 +327,7 @@ function validateStudentInfo() {
 function updateSummary() {
   const recorded = state.filter((item) => item.blob).length;
   const uploaded = state.filter((item) => item.uploaded).length;
-  summary.textContent = `已录音 ${recorded} / 10，已上传 ${uploaded} / 10`;
+  summary.textContent = `已录音 ${recorded} / ${state.length}，已上传 ${uploaded} / ${state.length}`;
 }
 
 function updateButtonStates() {

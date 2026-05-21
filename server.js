@@ -43,7 +43,7 @@ const server = http.createServer(async (req, res) => {
       return serveFile(res, filePath);
     }
 
-    if (req.method === "GET" && ["/app.js", "/styles.css", "/config.js"].includes(url.pathname)) {
+    if (req.method === "GET" && ["/app.js", "/styles.css", "/config.js", "/questions.json"].includes(url.pathname)) {
       return serveFile(res, path.join(PUBLIC_DIR, url.pathname.slice(1)));
     }
 
@@ -82,8 +82,8 @@ async function handleUpload(req, res) {
 
   if (!studentName) return sendJson(res, 400, { error: "Student name is required." });
   if (!email || !email.includes("@")) return sendJson(res, 400, { error: "Valid email is required." });
-  if (!Number.isInteger(questionNumber) || questionNumber < 1 || questionNumber > 10) {
-    return sendJson(res, 400, { error: "Question number must be 1-10." });
+  if (!Number.isInteger(questionNumber) || questionNumber < 1) {
+    return sendJson(res, 400, { error: "Question number must be a positive integer." });
   }
   if (!audio || typeof audio.arrayBuffer !== "function") {
     return sendJson(res, 400, { error: "Audio file is required." });
@@ -126,8 +126,8 @@ async function handleEvaluation(req, res) {
   if (!process.env.OPENAI_API_KEY) {
     return sendJson(res, 500, { error: "OpenAI API key is not configured. Please add OPENAI_API_KEY to .env.local." });
   }
-  if (!Number.isInteger(questionNumber) || questionNumber < 1 || questionNumber > 10) {
-    return sendJson(res, 400, { error: "Question number must be 1-10." });
+  if (!Number.isInteger(questionNumber) || questionNumber < 1) {
+    return sendJson(res, 400, { error: "Question number must be a positive integer." });
   }
   if (!prompt) return sendJson(res, 400, { error: "Prompt text is required." });
   if (!audio || typeof audio.arrayBuffer !== "function") {
