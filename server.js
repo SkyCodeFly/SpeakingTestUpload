@@ -475,7 +475,7 @@ function sendJson(res, status, payload) {
 }
 
 function applyCors(req, res) {
-  const allowedOrigin = process.env.CORS_ORIGIN || "*";
+  const allowedOrigin = normalizeCorsOrigin(process.env.CORS_ORIGIN || "*");
   const requestOrigin = req.headers.origin;
   res.setHeader("Access-Control-Allow-Origin", allowedOrigin === "*" ? "*" : allowedOrigin);
   if (allowedOrigin !== "*" && requestOrigin === allowedOrigin) {
@@ -483,6 +483,15 @@ function applyCors(req, res) {
   }
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
+}
+
+function normalizeCorsOrigin(value) {
+  if (!value || value === "*") return "*";
+  try {
+    return new URL(value).origin;
+  } catch {
+    return value.replace(/\/$/, "");
+  }
 }
 
 function loadDotEnv(filePath) {
