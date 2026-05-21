@@ -135,7 +135,7 @@ async function handleEvaluation(req, res) {
   }
 
   const buffer = Buffer.from(await audio.arrayBuffer());
-  const transcript = await transcribeAudio(buffer, audio.type || "audio/webm", `Q${questionNumber}.webm`, prompt);
+  const transcript = await transcribeAudio(buffer, audio.type || "audio/webm", `Q${questionNumber}.webm`);
   const evaluation = await evaluateReading({ questionNumber, prompt, transcript });
   sendJson(res, 200, {
     ok: true,
@@ -234,12 +234,11 @@ async function deleteExistingDriveFiles(folderId, filename) {
   }
 }
 
-async function transcribeAudio(buffer, mimeType, filename, prompt) {
+async function transcribeAudio(buffer, mimeType, filename) {
   const form = new FormData();
   form.append("model", process.env.OPENAI_TRANSCRIBE_MODEL || "gpt-4o-mini-transcribe");
   form.append("language", "zh");
   form.append("response_format", "json");
-  form.append("prompt", `这是一名小学四年级学生朗读中文句子。目标句子：${prompt}`);
   form.append("file", new Blob([buffer], { type: mimeType }), filename);
 
   const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
