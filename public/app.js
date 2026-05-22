@@ -66,6 +66,7 @@ function renderQuestions() {
         <button class="record-button" type="button">开始录音</button>
         <button class="play-button" type="button" disabled>回放</button>
         <button class="upload-button" type="button" disabled>上传</button>
+        <button class="evaluate-button" type="button" disabled>AI打分</button>
         <span class="status">未录音</span>
       </div>
       <div class="evaluation" aria-live="polite"></div>
@@ -93,6 +94,10 @@ function bindEvents() {
       if (button.classList.contains("upload-button")) {
         await uploadQuestion(item, card);
       }
+
+      if (button.classList.contains("evaluate-button")) {
+        await evaluateQuestion(item);
+      }
     } catch (error) {
       alert(error.message);
     }
@@ -108,6 +113,7 @@ async function toggleRecording(item, card) {
   const recordButton = card.querySelector(".record-button");
   const playButton = card.querySelector(".play-button");
   const uploadButton = card.querySelector(".upload-button");
+  const evaluateButton = card.querySelector(".evaluate-button");
   const status = card.querySelector(".status");
 
   if (item.recorder && item.recorder.state === "recording") {
@@ -146,6 +152,7 @@ async function toggleRecording(item, card) {
   item.recorder.start();
   playButton.disabled = true;
   uploadButton.disabled = true;
+  evaluateButton.disabled = true;
   recordButton.textContent = "停止录音";
   recordButton.classList.add("recording");
   status.textContent = "录音中";
@@ -166,11 +173,13 @@ async function uploadQuestion(item, card) {
   const recordButton = card.querySelector(".record-button");
   const playButton = card.querySelector(".play-button");
   const uploadButton = card.querySelector(".upload-button");
+  const evaluateButton = card.querySelector(".evaluate-button");
   const status = card.querySelector(".status");
   item.uploading = true;
   recordButton.disabled = true;
   playButton.disabled = true;
   uploadButton.disabled = true;
+  evaluateButton.disabled = true;
   status.textContent = "上传中";
   updateSummary();
 
@@ -342,11 +351,13 @@ function updateButtonStates() {
     const recordButton = card.querySelector(".record-button");
     const playButton = card.querySelector(".play-button");
     const uploadButton = card.querySelector(".upload-button");
+    const evaluateButton = card.querySelector(".evaluate-button");
     const isRecording = item.recorder && item.recorder.state === "recording";
 
     recordButton.disabled = item.uploading || item.evaluating;
     playButton.disabled = !item.blob || item.uploading || item.evaluating || isRecording;
     uploadButton.disabled = !hasStudentInfo || !item.blob || item.uploaded || item.uploading || item.evaluating || isRecording;
+    evaluateButton.disabled = !aiConfigured || !item.blob || item.uploading || item.evaluating || isRecording;
   });
 
   submitAllButton.disabled = !hasStudentInfo;
